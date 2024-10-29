@@ -12,14 +12,13 @@ public class PostVO {
     private String memberNickname;
     private int boardNum;
 
-    public PostVO(int postNum, String postTitle, String postContent, Date postPublishedDate, int postVisit, int memberNum, String memberNickname) {
+    public PostVO(int postNum, String postTitle, String postContent, Date postPublishedDate, int postVisit, int memberNum) {
         this.postNum = postNum;
         this.postTitle = postTitle;
         this.postContent = postContent;
         this.postPublishedDate = postPublishedDate;
         this.postVisit = postVisit;
         this.memberNum = memberNum;
-        this.memberNickname = memberNickname;
     }
 
     public int getPostNum() {

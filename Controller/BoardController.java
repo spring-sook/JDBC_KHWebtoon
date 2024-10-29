@@ -43,13 +43,13 @@ public class BoardController {
             List<PostVO> postList = postDAO.noticeSelect(boardNum);
             List<Integer> postNums = printer.printPostList(postList, boardChoice); // 게시글 프린트
 
-            displayPostService(postNums);
+            displayPostService(postNums, boardNum);
 
             break;
         } // 공지/자유 while문
     }
 
-    public void displayPostService(List<Integer> postNums) {
+    public void displayPostService(List<Integer> postNums, Integer boardNum) {
         String postIdx = null; // 게시글 인덱스
         while(true) {
             System.out.print("[1]게시글 내용 보기 [2]게시글 작성 [3]게시글 수정 [4]게시글 삭제 [5]뒤로가기: ");
@@ -67,13 +67,14 @@ public class BoardController {
                         if (boardChoice.equals("2")) { // 자유게시판이면 댓글기능 ON
                             displayReplyService(postNums, postIdxNum);
                         }
+                        printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     }
                     break;
                 case "2": // 게시글 작성
                     if (boardChoice.equals("1")) { // 공지게시판이면
                         if (memberId != null && memberTypeNum == 0) { // 공지게시판
                             String[] postContent = getVal.getPostContent();
-                            postDAO.postInsert(postContent[0], postContent[1], memberId, memberTypeNum, 0);
+                            postDAO.postInsert(postContent[0], postContent[1], memberId, boardNum);
                         } else if (memberId == null) {
                             System.out.println("로그인이 필요한 서비스입니다.");
                         } else if (memberTypeNum == 1) {
@@ -82,11 +83,12 @@ public class BoardController {
                     } else {
                         if (memberId != null) {  // 자유게시판
                             String[] postContent = getVal.getPostContent();
-                            postDAO.postInsert(postContent[0], postContent[1], memberId, memberTypeNum, 1);
+                            postDAO.postInsert(postContent[0], postContent[1], memberId, boardNum);
                         } else {
                             System.out.println("로그인이 필요한 서비스입니다.");
                         }
                     }
+                    printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     break;
                 case "3": // 게시글 수정
                     if (postNums.isEmpty()) {
@@ -101,6 +103,7 @@ public class BoardController {
                             System.out.println("작성자만 수정 가능합니다.");
                         }
                     }
+                    printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     break;
                 case "4": // 게시글 삭제
                     if (postNums.isEmpty()) {
@@ -134,12 +137,14 @@ public class BoardController {
                 List<ReplyVO> replyList = replyDAO.replySelect(postNums.get(postIdxNum));
                 List<Integer> replyNums = printer.printReplyList(replyList);
                 viewReplyDetail(postNums, replyNums, postIdxNum);
+                break;
             case "2": // 댓글 작성
                 if (memberId != null) {
                     replyDAO.replyInsert(postNums.get(postIdxNum), memberId);
                 } else {
                     System.out.println("로그인이 필요한 서비스입니다.");
                 }
+                break;
             case "3": break;
             default:
                 System.out.println("잘못 입력하셨습니다.");
@@ -148,13 +153,13 @@ public class BoardController {
 
     public void viewReplyDetail(List<Integer> postNums, List<Integer> replyNums, int postIdxNum) {
         String replyIdx = null;
-        int replyIdxNum = Integer.parseInt(replyIdx) - 1;
         System.out.print("[1]댓글 수정 [2]댓글 작성 [3]댓글 공감 [4]댓글 비공감 [5]뒤로가기 : ");
         String replyDetailChoice = sc.nextLine();
         switch (replyDetailChoice) {
             case "1": // 댓글 수정
                 System.out.print("댓글 번호 입력 : ");
                 replyIdx = sc.nextLine();
+                int replyIdxNum = Integer.parseInt(replyIdx) - 1;
                 if (replyDAO.getMemberId(replyNums.get(replyIdxNum)).equals(memberId)) {
                     replyDAO.replyUpdate(postNums.get(postIdxNum), replyNums.get(replyIdxNum), memberId);
                 } else {
@@ -169,9 +174,15 @@ public class BoardController {
                 }
                 break;
             case "3": // 댓글 공감
+                System.out.print("댓글 번호 입력 : ");
+                replyIdx = sc.nextLine();
+                replyIdxNum = Integer.parseInt(replyIdx) - 1;
                 replyDAO.replyLikeUpdate(replyNums.get(replyIdxNum));
                 // 공감 누르면 reply evaluation 테이블 삽입 필요.. 및 검사? 오류 안나게.. 인당 1번만 가능
             case "4": // 댓글 비공감
+                System.out.print("댓글 번호 입력 : ");
+                replyIdx = sc.nextLine();
+                replyIdxNum = Integer.parseInt(replyIdx) - 1;
                 replyDAO.replyDislikeUpdate(replyNums.get(replyIdxNum));
             case "5": break;
             default:

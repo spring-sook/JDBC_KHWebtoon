@@ -1,5 +1,6 @@
 package WebtoonConsole.Common;
 
+import WebtoonConsole.DAO.PostDAO;
 import WebtoonConsole.VO.PostVO;
 import WebtoonConsole.VO.ReplyVO;
 import WebtoonConsole.VO.WebtoonVO;
@@ -78,6 +79,7 @@ public class Printer {
 
     public List<Integer> printPostList(List<PostVO> list, String boardChoice) {
         List<Integer> postNum = new ArrayList<>();
+        PostDAO postDAO = new PostDAO();
         String header = null;
         int postIdx = 1;
         if (boardChoice.equals("1")) { header = "공지 게시판"; }
@@ -93,7 +95,8 @@ public class Printer {
                 postNum.add(e.getPostNum());
                 System.out.print("(" + postIdx++ + ") ");
                 System.out.print(e.getPostTitle() + " ");
-                System.out.print(e.getMemberNickname() + " ");
+                String memberNickname = postDAO.getMemberNickname(e.getMemberNum());
+                System.out.print(memberNickname + " ");
                 System.out.print(e.getPostVisit());
                 System.out.println();
             }

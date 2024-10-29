@@ -31,12 +31,12 @@ public class PostDAO {
                 Date postPublishedDate = rs.getDate("post_published_date");
                 int postVisit = rs.getInt("post_visit");
                 int memberNum = rs.getInt("member_num");
-                String memberNickname = getMemberNickname(memberNum);
 
-                PostVO postVO = new PostVO(postNum, postTitle, postContent, postPublishedDate, postVisit, memberNum, memberNickname);
+                PostVO postVO = new PostVO(postNum, postTitle, postContent, postPublishedDate, postVisit, memberNum);
                 noticeList.add(postVO);
             }
         } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             Common.close(rs);
             Common.close(psmt);
@@ -110,7 +110,7 @@ public class PostDAO {
         return postContent;
     }
 
-    private String getMemberNickname(int memberNum) {
+    public String getMemberNickname(int memberNum) {
         String memberNickname = null;
         String query = "SELECT member_nickname, member_type_num FROM MEMBER " +
                         "WHERE member_num = ?";
@@ -174,20 +174,18 @@ public class PostDAO {
         return memberNum;
     }
 
-    public void postInsert(String postTitle, String postContent, String memberId, int memberTypeNum, Integer boardNum){
+    public void postInsert(String postTitle, String postContent, String memberId, Integer boardNum){
         int rs = 0;
-        String query = "INSERT INTO POST (post_title, post_content, post_published_date, post_visit, member_num, board_num) " +
-                        "VALUES (?, ?, SYSDATE, ?, ?, ?)";
+        Integer memberNum = getMemberNum(memberId);
+        String query = "INSERT INTO POST (post_title, post_content, post_published_date, member_num, board_num) " +
+                        "VALUES (?, ?, SYSDATE, ?, ?)";
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(query);
             psmt.setString(1, postTitle);
             psmt.setString(2, postContent);
-            psmt.setInt(3, 0);
-            psmt.setInt(4, getMemberNum(memberId));
-            System.out.println(boardNum);
-            psmt.setInt(5, boardNum);
-            System.out.println("Insert 실행!!!");
+            psmt.setInt(3, memberNum);
+            psmt.setInt(4, boardNum);
             rs = psmt.executeUpdate();
             if (rs > 0) {
                 System.out.println("게시글 작성이 완료되었습니다.");
@@ -207,13 +205,16 @@ public class PostDAO {
         String postContent = getPostContent(postNum);
         String[] postUpdate = gv.printPostUpdate(postTitle, postContent);  // 네/아니오, updateTitle, updateContent
         if (postUpdate[0].equals("1")) {
-            String query = "UPDATE POST SET post_title = ? AND post_content = ? WHERE post_num = ?";
+            String query = "UPDATE POST SET post_title = ? , post_content = ? WHERE post_num = ?";
             try {
                 conn = Common.getConnection();
                 psmt = conn.prepareStatement(query);
+                System.out.println(postUpdate[1]);
                 psmt.setString(1, postUpdate[1]);
+                System.out.println(postUpdate[2]);
                 psmt.setString(2, postUpdate[2]);
-                psmt.setInt(3, 0);
+                System.out.println(postNum);
+                psmt.setInt(3, postNum);
                 rs = psmt.executeQuery();
             } catch (Exception e) {
                 System.out.println("수정 내용을 잘못 입력하셨습니다.");
