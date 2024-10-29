@@ -154,7 +154,27 @@ public class PostDAO {
         return memberId;
     }
 
-    public void postInsert(String postTitle, String postContent, String memberId, int memberTypeNum, int boardNum){
+    public Integer getMemberNum (String memberId) {
+        int memberNum = 0;
+        String query = "SELECT member_num FROM MEMBER WHERE member_id = ? ";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, memberId);
+            rs = psmt.executeQuery();
+            while (rs.next()) {
+                memberNum = rs.getInt("member_num");
+            }
+        }catch (Exception e) {
+        }finally {
+            Common.close(rs);
+            Common.close(psmt);
+            Common.close(conn);
+        }
+        return memberNum;
+    }
+
+    public void postInsert(String postTitle, String postContent, String memberId, int memberTypeNum, Integer boardNum){
         int rs = 0;
         String query = "INSERT INTO POST (post_title, post_content, post_published_date, post_visit, member_num, board_num) " +
                         "VALUES (?, ?, SYSDATE, ?, ?, ?)";
@@ -164,18 +184,21 @@ public class PostDAO {
             psmt.setString(1, postTitle);
             psmt.setString(2, postContent);
             psmt.setInt(3, 0);
-            psmt.setInt(4, memberTypeNum);
+            psmt.setInt(4, getMemberNum(memberId));
+            System.out.println(boardNum);
             psmt.setInt(5, boardNum);
+            System.out.println("Insert 실행!!!");
             rs = psmt.executeUpdate();
+            if (rs > 0) {
+                System.out.println("게시글 작성이 완료되었습니다.");
+            } else {
+                System.out.println("게시글 작성에 실패했습니다.");
+            }
         } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             Common.close(psmt);
             Common.close(conn);
-        }
-        if (rs > 0) {
-            System.out.println("게시글 작성이 완료되었습니다.");
-        } else {
-            System.out.println("게시글 작성에 실패했습니다.");
         }
     }
 

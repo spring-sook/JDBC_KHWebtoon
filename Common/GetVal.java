@@ -19,12 +19,14 @@ public class GetVal {
     public int getDay() {
         System.out.print("요일을 선택하세요 [1]월요일 [2]화요일 [3]수요일 [4]목요일 [5]금요일 [6]토요일 [7]일요일 : ");
         int day = sc.nextInt();
+        sc.nextLine();
         return day;
     }
 
     public int getGenre(){
         System.out.print("장르를 선택하세요 [1]드라마 [2]로맨스 [3]무협 [4]액션 [5]판타지 [6]기타 : ");
         int genre = sc.nextInt();
+        sc.nextLine();
         return genre;
     }
 

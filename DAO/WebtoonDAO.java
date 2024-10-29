@@ -2,6 +2,7 @@ package WebtoonConsole.DAO;
 
 import WebtoonConsole.Common.Common;
 import WebtoonConsole.Common.GetVal;
+import WebtoonConsole.Common.Printer;
 import WebtoonConsole.VO.WebtoonVO;
 
 import java.sql.*;
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class WebtoonDAO {
     GetVal gv = new GetVal();
+    Printer printer = new Printer();
     Connection conn = null;
     Statement stmt = null;
     PreparedStatement psmt = null;
@@ -151,7 +153,8 @@ public class WebtoonDAO {
         }
     }
 
-    public List<WebtoonVO> searchWebtoon(String searchKeyword) {
+    public void searchWebtoon() {
+        String searchKeyword = gv.getSearchKeyword();
         List<WebtoonVO> searchList = new ArrayList<>();
         String query0 = "SELECT w.*, g.genre_name " +
                         "FROM WEBTOON w JOIN GENRE g " +
@@ -194,7 +197,7 @@ public class WebtoonDAO {
             Common.close(psmt);
             Common.close(conn);
         }
-        return searchList;
+        printer.printSearchResult(searchList, searchKeyword);
     }
 
     private List<WebtoonVO> executeWebtoonQuery(String query0, String query1, Object param) {
@@ -225,6 +228,7 @@ public class WebtoonDAO {
             Common.close(psmt);
             Common.close(conn);
         }
+
         return list;
     }
 

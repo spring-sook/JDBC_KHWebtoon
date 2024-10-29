@@ -16,7 +16,8 @@ public class Printer {
         printWebtoonList(list, "genre");  // 장르별 웹툰 목록 출력
     }
 
-    public void webtoonRecommendResult(List<WebtoonVO> list) {
+    public void webtoonRecommendResult(List<WebtoonVO> list, String memberNickname) {
+        System.out.println("☆" + memberNickname + "님☆만을 위한 추천 목록");
         printWebtoonList(list, "recommend");  // 추천 웹툰 목록 출력
     }
 
@@ -75,15 +76,15 @@ public class Printer {
         System.out.println();
     }
 
-    public List<Integer> printPostList(List<PostVO> list, String boardNum) {
+    public List<Integer> printPostList(List<PostVO> list, String boardChoice) {
         List<Integer> postNum = new ArrayList<>();
         String header = null;
         int postIdx = 1;
-        if (boardNum.equals("1")) { header = "공지 게시판"; }
-        else if (boardNum.equals("2")) { header = "자유 게시판"; }
-        System.out.println("-".repeat(100));
+        if (boardChoice.equals("1")) { header = "공지 게시판"; }
+        else if (boardChoice.equals("2")) { header = "자유 게시판"; }
+//        System.out.println("-".repeat(100));
         System.out.println(" ".repeat(43) + header);
-        System.out.println("-".repeat(100));
+//        System.out.println("-".repeat(100));
         if (list.isEmpty()) {
             System.out.println("게시글이 없습니다.");
         } else {
