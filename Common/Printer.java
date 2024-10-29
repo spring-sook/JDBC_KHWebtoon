@@ -1,7 +1,10 @@
 package WebtoonConsole.Common;
 
+import WebtoonConsole.VO.PostVO;
+import WebtoonConsole.VO.ReplyVO;
 import WebtoonConsole.VO.WebtoonVO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Printer {
@@ -71,4 +74,54 @@ public class Printer {
         System.out.print(e.getWebtoonRating() + " ");
         System.out.println();
     }
+
+    public List<Integer> printPostList(List<PostVO> list, String boardNum) {
+        List<Integer> postNum = new ArrayList<>();
+        String header = null;
+        int postIdx = 1;
+        if (boardNum.equals("1")) { header = "공지 게시판"; }
+        else if (boardNum.equals("2")) { header = "자유 게시판"; }
+        System.out.println("-".repeat(100));
+        System.out.println(" ".repeat(43) + header);
+        System.out.println("-".repeat(100));
+        if (list.isEmpty()) {
+            System.out.println("게시글이 없습니다.");
+        } else {
+            System.out.println("   제목  작성자 조회수");
+            for (PostVO e : list) {
+                postNum.add(e.getPostNum());
+                System.out.print("(" + postIdx++ + ") ");
+                System.out.print(e.getPostTitle() + " ");
+                System.out.print(e.getMemberNickname() + " ");
+                System.out.print(e.getPostVisit());
+                System.out.println();
+            }
+        }
+        return postNum;
+    }
+
+    public void printPostContent(String content) {
+        System.out.println(content);
+    }
+
+    public List<Integer> printReplyList(List<ReplyVO> list) {
+        List<Integer> replyNums = new ArrayList<>();
+        int replyIdx = 1;
+        if (list.isEmpty()) {
+            System.out.println("댓글이 없습니다.");
+        } else {
+            System.out.println("   작성자 내용 공감 비공감");
+            for (ReplyVO e : list) {
+                replyNums.add(e.getReplyNum());
+                System.out.print("(" + replyIdx++ + ") ");
+                System.out.print(e.getMemberNickname() + " ");
+                System.out.print(e.getReplyContent() + " ");
+                System.out.print(e.getReplyLikeCount() + " ");
+                System.out.print(e.getReplyDislikeCount() + " ");
+                System.out.println();
+            }
+        }
+        return replyNums;
+    }
+
 }

@@ -48,7 +48,7 @@ public class MemberDAO {
     }
 
     public void memberInsert() {
-        int memberResult = 0, favoriteGenreResult = 0;
+        int memberResult = 0;
         Integer memberNum = maxMemberNumSelect();
         List<String> memberInfo = gv.memberInfo(); //{memberID, memberPW, memberEmail, memberBirth, memberNickname}
         String memberQuery = "INSERT INTO MEMBER VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), ?, SYSDATE, 0, 1)";
@@ -121,5 +121,26 @@ public class MemberDAO {
             Common.close(conn);
         }
         return exists;
+    }
+
+    public Integer memberNumSelect(String memberId) {
+        int memberNum = 0;
+        String query = "SELECT member_num FROM MEMBER WHERE member_id = ?";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, memberId);
+            rs = psmt.executeQuery();
+
+            while(rs.next()) {
+                memberNum = rs.getInt("member_num");
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(rs);
+            Common.close(psmt);
+            Common.close(conn);
+        }
+        return memberNum;
     }
 }

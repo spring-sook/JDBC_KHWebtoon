@@ -1,6 +1,7 @@
 package WebtoonConsole.Common;
 
 import WebtoonConsole.DAO.MemberDAO;
+import WebtoonConsole.DAO.PostDAO;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -149,6 +150,39 @@ public class GetVal {
     public String getSearchKeyword() {
         System.out.print("검색어(제목 또는 작가) 입력 : ");
         return sc.nextLine();
+    }
+
+    public String[] getPostContent() {
+        System.out.print("제목 : ");
+        String postTitle = sc.nextLine();
+        System.out.print("내용(입력 완료시에만 엔터) : ");
+        String postContent = sc.nextLine();
+        return new String[] {postTitle, postContent};
+    }
+
+    public String[] printPostUpdate(String postTitle, String postContent) {
+        System.out.println("원본 제목 : " + postTitle);
+        System.out.print("수정 제목 : ");
+        String updateTitle = sc.nextLine();
+        System.out.println("원본 내용 : " + postContent);
+        System.out.print("수정 내용 : ");
+        String updateContent = sc.nextLine();
+        System.out.print("수정을 진행하시겠습니까? [1]네 [2]아니오 : ");
+        String choice = sc.nextLine();
+        return new String[] {choice, updateTitle, updateContent};
+    }
+
+    public String getReplyContent() {
+        System.out.print("내용(입력 완료시에만 엔터) : ");
+        String replyContent = sc.nextLine();
+        return replyContent;
+    }
+
+    public String getUpdateReplyContent(String replyContent) {
+        System.out.println("원본 내용 : " + replyContent);
+        System.out.print("수정 내용 : ");
+        String updateReplyContent = sc.nextLine();
+        return updateReplyContent;
     }
 
 }
