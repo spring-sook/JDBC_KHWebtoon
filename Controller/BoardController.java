@@ -21,6 +21,7 @@ public class BoardController {
     Printer printer = new Printer();
     PostDAO postDAO = new PostDAO();
     ReplyDAO replyDAO = new ReplyDAO();
+    MainController mainController = new MainController();
 
     public BoardController(String memberNickname, String memberId, int memberTypeNum) {
         this.memberNickname = memberNickname;
@@ -29,13 +30,13 @@ public class BoardController {
     }
 
     public void displayBoardService() {
-        while (true) { // 무한 루프를 사용하여 올바른 입력을 받을 때까지 반복
+        while (true) {
             System.out.print("[1]공지게시판 [2]자유게시판 : ");
             boardChoice = sc.nextLine();
 
             if (!boardChoice.equals("1") && !boardChoice.equals("2")) {
                 System.out.println("잘못 입력하셨습니다.");
-                continue; // 다시 입력 요청
+                continue;
             }
 
             int boardNum = Integer.parseInt(boardChoice) - 1; // 0(공지), 1(자유)
@@ -52,7 +53,7 @@ public class BoardController {
     public void displayPostService(List<Integer> postNums, Integer boardNum) {
         String postIdx = null; // 게시글 인덱스
         while(true) {
-            System.out.print("[1]게시글 내용 보기 [2]게시글 작성 [3]게시글 수정 [4]게시글 삭제 [5]뒤로가기: ");
+            System.out.print("[1]게시글 내용 보기 [2]게시글 작성 [3]뒤로가기 [4]메인페이지 이동 [0]종료 : ");
             String postChoice = sc.nextLine();
             switch (postChoice) {
                 case "1": // 게시글 내용 보기
@@ -62,10 +63,12 @@ public class BoardController {
                         System.out.print("열람할 게시글 번호를 입력해주세요 : ");
                         postIdx = sc.nextLine();
                         int postIdxNum = Integer.parseInt(postIdx) - 1;
-                        String content = postDAO.viewPostContent(postNums.get(postIdxNum));
-                        printer.printPostContent(content); // 게시글 내용 출력
+                        String[] titleContent = postDAO.viewPostContent(postNums.get(postIdxNum));
+                        printer.printPostContent(titleContent[0], titleContent[1], postIdx); // 게시글 내용 출력
                         if (boardChoice.equals("2")) { // 자유게시판이면 댓글기능 ON
-                            displayReplyService(postNums, postIdxNum);
+                            List<ReplyVO> replyList = replyDAO.replySelect(postNums.get(postIdxNum));
+                            List<Integer> replyNums = printer.printReplyList(replyList); // 댓글 내용 출력
+                            displayReplyService(postNums, replyNums, postIdxNum, boardNum);
                         }
                     }
                     break;
@@ -89,118 +92,116 @@ public class BoardController {
                     }
                     postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     break;
-                case "3": // 게시글 수정
-                    if (postNums.isEmpty()) {
-                        System.out.println("수정할 게시글지 존재하지 않습니다.");
-                    } else {
-                        System.out.print("수정할 게시글 번호를 입력해주세요 : ");
-                        postIdx = sc.nextLine();
-                        int postIdxNum = Integer.parseInt(postIdx) - 1;
-                        if (postDAO.getMemberId(postNums.get(postIdxNum)).equals(memberId)) {
-                            postDAO.postUpdate(postNums.get(postIdxNum));
-                            postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
-                        } else {
-                            System.out.println("운영자만 수정 가능합니다.");
-                        }
-                    }
-                    break;
-                case "4": // 게시글 삭제
-                    if (postNums.isEmpty()) {
-                        System.out.println("삭제할 게시글이 존재하지 않습니다.");
-                    } else {
-                        System.out.print("삭제할 게시글 번호를 입력해주세요 : ");
-                        postIdx = sc.nextLine();
-                        int postIdxNum = Integer.parseInt(postIdx) - 1;
-                        if (postDAO.getMemberId(postNums.get(postIdxNum)).equals(memberId)) {
-                            System.out.print("정말 삭제하시겠습니까? [1]네 [2]아니오 : ");
-                            String delChoice = sc.nextLine();
-                            if (delChoice.equals("1")) {
-                                postDAO.postDelete(postNums.get(postIdxNum));
-                                postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
-                            } else {
-                                postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
-                            }
-                        } else {
-                            System.out.println("운영자만 삭제 가능합니다.");
-                        }
-                    }
-                    break;
-                case "5":
+                case "3": // 뒤로가기
                     return;
+                case "4": // 메인페이지 이동
+                    mainController.displayMainMenu();
+                    return;
+                case "0": // 종료
+                    System.out.println("종료합니다."); System.exit(1);
                 default:
                     System.out.println("잘못 입력하셨습니다.");
             }
         }
     }
 
-    public void displayReplyService(List<Integer> postNums, int postIdxNum) {
-        System.out.print("[1]댓글 보기 [2]댓글 작성 [3]뒤로가기 : ");
-        String replyChoice = sc.nextLine();
-        switch (replyChoice) {
-            case "1": // 댓글 보기
-                List<ReplyVO> replyList = replyDAO.replySelect(postNums.get(postIdxNum));
-                List<Integer> replyNums = printer.printReplyList(replyList);
-                viewReplyDetail(postNums, replyNums, postIdxNum);
-                break;
-            case "2": // 댓글 작성
-                if (memberId != null) {
-                    replyDAO.replyInsert(postNums.get(postIdxNum), memberId);
-                } else {
-                    System.out.println("로그인이 필요한 서비스입니다.");
-                }
-                break;
-            case "3": break;
-            default:
-                System.out.println("잘못 입력하셨습니다.");
-        }
-    }
-
-    public void viewReplyDetail(List<Integer> postNums, List<Integer> replyNums, int postIdxNum) {
+    public void displayReplyService(List<Integer> postNums, List<Integer> replyNums, int postIdxNum, int boardNum) {
         String replyIdx = null;
-        System.out.print("[1]댓글 수정 [2]댓글 작성 [3]댓글 공감 [4]댓글 비공감 [5]뒤로가기 : ");
-        String replyDetailChoice = sc.nextLine();
-        switch (replyDetailChoice) {
-            case "1": // 댓글 수정
-                System.out.print("댓글 번호 입력 : ");
-                replyIdx = sc.nextLine();
-                int replyIdxNum = Integer.parseInt(replyIdx) - 1;
-                if (replyDAO.getMemberId(replyNums.get(replyIdxNum)).equals(memberId)) {
-                    replyDAO.replyUpdate(postNums.get(postIdxNum), replyNums.get(replyIdxNum), memberId);
-                } else {
-                    System.out.println("작성자만 수정 가능합니다.");
-                }
-                break;
-            case "2": // 댓글 작성
-                if (memberId != null) {
-                    replyDAO.replyInsert(postNums.get(postIdxNum), memberId);
-                } else {
-                    System.out.println("로그인이 필요한 서비스입니다.");
-                }
-                break;
-            case "3": // 댓글 공감
-                if (memberId != null) {
+        System.out.print("[1]게시글 수정 [2]게시글 삭제 [3]댓글 작성 [4]댓글 수정 [5]댓글 삭제 [6]댓글 공감 [7]댓글 비공감 [8]공감/비공감 취소 [9]뒤로가기 [10]메인페이지 이동 [0]종료 : ");
+        String replyChoice = sc.nextLine();
+        while(true) {
+            switch (replyChoice) {
+                case "1":
+                    if (postDAO.getMemberId(postNums.get(postIdxNum)).equals(memberId)) {
+                        postDAO.postUpdate(postNums.get(postIdxNum));
+                        postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
+                    } else {
+                        System.out.println("작성자만 수정 가능합니다.");
+                    }
+                    break;
+                case "2":
+                    if (postDAO.getMemberId(postNums.get(postIdxNum)).equals(memberId)) {
+                        System.out.print("정말 삭제하시겠습니까? [1]네 [2]아니오 : ");
+                        String delChoice = sc.nextLine();
+                        if (delChoice.equals("1")) {
+                            postDAO.postDelete(postNums.get(postIdxNum));
+                            postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
+                        } else {
+                            postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
+                        }
+                    } else {
+                        System.out.println("작성자만 삭제 가능합니다.");
+                    }
+                    break;
+                case "3": // 댓글 작성
+                    if (memberId != null) {
+                        replyDAO.replyInsert(postNums.get(postIdxNum), memberId);
+                    } else {
+                        System.out.println("로그인이 필요한 서비스입니다.");
+                    }
+                    break;
+                case "4": // 댓글 수정
                     System.out.print("댓글 번호 입력 : ");
                     replyIdx = sc.nextLine();
-                    replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                    int replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                    if (replyDAO.getMemberId(replyNums.get(replyIdxNum)).equals(memberId)) {
+                        replyDAO.replyUpdate(postNums.get(postIdxNum), replyNums.get(replyIdxNum), memberId);
+                    } else {
+                        System.out.println("작성자만 수정 가능합니다.");
+                    }
+                    break;
+                case "5": // 댓글 삭제
+                    if (memberId != null) {
+                        System.out.print("댓글 번호 입력 : ");
+                        replyIdx = sc.nextLine();
+                        replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                        replyDAO.replyDelete(memberId, replyNums.get(replyIdxNum));
+                    } else {
+                        System.out.println("로그인이 필요한 서비스입니다.");
+                    }
+                    break;
+                case "6": // 댓글 공감
+                    if (memberId != null) {
+                        System.out.print("댓글 번호 입력 : ");
+                        replyIdx = sc.nextLine();
+                        replyIdxNum = Integer.parseInt(replyIdx) - 1;
 
-                    replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 0);
-                } else {
-                    System.out.println("로그인이 필요한 서비스입니다.");
-                }
-                break;
-            case "4": // 댓글 비공감
-                if (memberId != null) {
-                    System.out.print("댓글 번호 입력 : ");
-                    replyIdx = sc.nextLine();
-                    replyIdxNum = Integer.parseInt(replyIdx) - 1;
-                    replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 1);
-                } else {
-                    System.out.println("로그인이 필요한 서비스입니다.");
-                }
-                break;
-            case "5": break;
-            default:
-                System.out.println("잘못 입력하셨습니다.");
+                        replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 0);
+                    } else {
+                        System.out.println("로그인이 필요한 서비스입니다.");
+                    }
+                    break;
+                case "7": // 댓글 비공감
+                    if (memberId != null) {
+                        System.out.print("댓글 번호 입력 : ");
+                        replyIdx = sc.nextLine();
+                        replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                        replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 1);
+                    } else {
+                        System.out.println("로그인이 필요한 서비스입니다.");
+                    }
+                    break;
+                case "8": // 공감/비공감 취소
+                    if (memberId != null) {
+                        System.out.print("댓글 번호 입력 : ");
+                        replyIdx = sc.nextLine();
+                        replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                        replyDAO.replyLikeDelete(memberId, replyNums.get(replyIdxNum));
+                    } else {
+                        System.out.println("로그인이 필요한 서비스입니다.");
+                    }
+                    break;
+                case "9": // 뒤로가기
+                    return;
+                case "10": // 메인페이지 이동
+                    mainController.displayMainMenu();
+                    return;
+                case "0":
+                    System.out.println("종료합니다.");
+                    System.exit(1);
+                default:
+                    System.out.println("잘못 입력하셨습니다.");
+            }
         }
     }
 }

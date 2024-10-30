@@ -40,29 +40,29 @@ public class WebtoonDAO {
         int genreInt = gv.getGenre();
 
         String query0 = "SELECT w.*, g.genre_name " +
-                "FROM WEBTOON w JOIN GENRE g " +
-                "ON w.genre_num = g.genre_num " +
-                "WHERE w.genre_num = ? AND w.platform_num = 0 " +
-                "ORDER BY w.webtoon_subscribe_count DESC";
+                        "FROM WEBTOON w JOIN GENRE g " +
+                        "ON w.genre_num = g.genre_num " +
+                        "WHERE w.genre_num = ? AND w.platform_num = 0 " +
+                        "ORDER BY w.webtoon_subscribe_count DESC";
         String query1 = "SELECT w.*, g.genre_name " +
-                "FROM WEBTOON w JOIN GENRE g " +
-                "ON w.genre_num = g.genre_num " +
-                "WHERE w.genre_num = ? AND w.platform_num = 1 " +
-                "ORDER BY w.webtoon_view_count DESC";
+                        "FROM WEBTOON w JOIN GENRE g " +
+                        "ON w.genre_num = g.genre_num " +
+                        "WHERE w.genre_num = ? AND w.platform_num = 1 " +
+                        "ORDER BY w.webtoon_view_count DESC";
         return executeWebtoonQuery(query0, query1, genreInt);
     }
 
     public List<WebtoonVO> webtoonNoMemberRecommend() {  // 요일별 웹툰 검색
         String query0 = "SELECT w.*, g.genre_name " +
-                "FROM WEBTOON w JOIN GENRE g " +
-                "ON w.genre_num = g.genre_num " +
-                "WHERE w.platform_num = 0 " +
-                "ORDER BY w.webtoon_subscribe_count DESC";
+                        "FROM WEBTOON w JOIN GENRE g " +
+                        "ON w.genre_num = g.genre_num " +
+                        "WHERE w.platform_num = 0 " +
+                        "ORDER BY w.webtoon_subscribe_count DESC";
         String query1 = "SELECT w.*, g.genre_name " +
-                "FROM WEBTOON w JOIN GENRE g " +
-                "ON w.genre_num = g.genre_num " +
-                "WHERE w.platform_num = 1 " +
-                "ORDER BY w.webtoon_view_count DESC";
+                        "FROM WEBTOON w JOIN GENRE g " +
+                        "ON w.genre_num = g.genre_num " +
+                        "WHERE w.platform_num = 1 " +
+                        "ORDER BY w.webtoon_view_count DESC";
 
         List<WebtoonVO> platform0List = executeWebtoonQuery(query0);
         List<WebtoonVO> platform1List = executeWebtoonQuery(query1);

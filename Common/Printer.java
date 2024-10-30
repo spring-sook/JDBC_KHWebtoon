@@ -35,6 +35,7 @@ public class Printer {
         int countPlatform0 = 0;
         int countPlatform1 = 0;
         String header = null;
+        String previousTitle = null;
 
         for (WebtoonVO e : list) {
             int platformNum = e.getPlatformNum();
@@ -52,14 +53,20 @@ public class Printer {
                 if (countPlatform0 == 0) {
                     System.out.println("<< " + platformName + " " + header + " >>");
                 }
-                printWebtoonDetails(e, availableAgeStr);
-                countPlatform0++;
+                if (!e.getWebtoonTitle().equals(previousTitle)) {
+                    printWebtoonDetails(e, availableAgeStr);
+                    countPlatform0++;
+                    previousTitle = e.getWebtoonTitle();
+                }
             } else if (platformNum == 1 && countPlatform1 < 9) {
                 if (countPlatform1 == 0) {
                     System.out.println("<< " + platformName + " " + header + " >>");
                 }
-                printWebtoonDetails(e, availableAgeStr);
-                countPlatform1++;
+                if (!e.getWebtoonTitle().equals(previousTitle)) {
+                    printWebtoonDetails(e, availableAgeStr);
+                    countPlatform1++;
+                    previousTitle = e.getWebtoonTitle();
+                }
             }
 
             // 두 플랫폼 모두 9개씩 출력되면 루프 종료
@@ -73,7 +80,8 @@ public class Printer {
         System.out.printf("%-25s ", e.getWebtoonTitle());
         System.out.printf("%-10s ", e.getGenreName());
         System.out.printf("%-10s ", availableAgeStr);
-        System.out.printf("%5.2f", e.getWebtoonRating());
+        System.out.printf("%-8.2f ", e.getWebtoonRating());
+        System.out.printf("%-50s ", e.getWebtoonAuthor());
         System.out.println();
 
 //        System.out.print("[" + e.getWebtoonTitle() + "] ");
@@ -110,8 +118,12 @@ public class Printer {
         return postNum;
     }
 
-    public void printPostContent(String content) {
+    public void printPostContent(String title, String content, String postIdx) {
+        System.out.println("-".repeat(20) + " " + postIdx + "번 게시글 " + "-".repeat(20));
+        System.out.println("제목 : " + title);
+        System.out.println("내용");
         System.out.println(content);
+        System.out.println("-".repeat(50));
     }
 
     public List<Integer> printReplyList(List<ReplyVO> list) {
@@ -120,18 +132,31 @@ public class Printer {
         if (list.isEmpty()) {
             System.out.println("댓글이 없습니다.");
         } else {
-            System.out.println("   작성자 내용 공감 비공감");
+            System.out.printf("%-3s %-10s %-20s %-8s %-8s%n", "번호", "작성자", "내용", "공감수", "비공감수");
             for (ReplyVO e : list) {
                 replyNums.add(e.getReplyNum());
-                System.out.print("(" + replyIdx++ + ") ");
-                System.out.print(e.getMemberNickname() + " ");
-                System.out.print(e.getReplyContent() + " ");
-                System.out.print(e.getReplyLikeCount() + " ");
-                System.out.print(e.getReplyDislikeCount() + " ");
-                System.out.println();
+                System.out.printf("%-5d %-10s %-20s %-9d %-8d%n", replyIdx++, e.getMemberNickname(), e.getReplyContent(), e.getReplyLikeCount(), e.getReplyDislikeCount());
             }
+            System.out.println("-".repeat(50));
         }
         return replyNums;
+    }
+
+    public void printMemberInfo(List<String> memberInfo) { // id, nickname, pw, email, birth, 선호장르
+        System.out.println("------------ 내 정보 ------------");
+        System.out.println("I    D  : " + memberInfo.get(0));
+        System.out.println("닉 네 임 : " + memberInfo.get(1));
+        System.out.println("비밀번호 : " + "*".repeat(memberInfo.get(2).length()));
+        System.out.println("E-Mail : " + memberInfo.get(3));
+        System.out.println("생   일 : " + memberInfo.get(4));
+        if (memberInfo.size() > 5) {
+            System.out.print("선호장르 : ");
+            for (int i = 5; i < memberInfo.size(); i++) {
+                System.out.print(memberInfo.get(i) + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("-------------------------------");
     }
 
 }

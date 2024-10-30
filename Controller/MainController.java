@@ -13,9 +13,9 @@ public class MainController {
         while (true) {
             System.out.println("******************************* KH WEBTOON *******************************");
             if (loginController.getMemberId() == null) {
-                System.out.print("[1]웹툰 통합 조회 서비스(네이버, 카카오) [2]커뮤니티 게시판 [3] 로그인/회원가입 [4] 종료 : ");
+                System.out.print("[1]웹툰 통합 조회 서비스(네이버, 카카오) [2]커뮤니티 게시판 [3] 로그인/회원가입 [0] 종료 : ");
             } else {
-                System.out.print("[1]웹툰 통합 조회 서비스(네이버, 카카오) [2]커뮤니티 게시판 [3] 로그아웃 [4] 종료 : ");
+                System.out.print("[1]웹툰 통합 조회 서비스(네이버, 카카오) [2]커뮤니티 게시판 [3]로그아웃 [4]마이페이지 [0] 종료 : ");
             }
             mainChoice = sc.nextLine();
 
@@ -31,8 +31,10 @@ public class MainController {
                 case "3" : // 로그인/회원가입 or 로그아웃
                     loginController.displayLoginService();
                     break;
-                case "4":
-                    System.out.println("종료하겠습니다."); System.exit(1);
+                case "4": // 마이페이지
+                    loginController.displayMyPage(loginController.getMemberId());
+                case "0":
+                    System.out.println("종료합니다."); System.exit(1);
                 default: System.out.println("잘못 입력하셨습니다.");
 
             }

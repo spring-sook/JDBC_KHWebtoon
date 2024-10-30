@@ -23,7 +23,7 @@ public class WebtoonController {
 
     public void displayWebtoonService() {
         while(true) {
-            System.out.print("[1]요일별 조회 [2]장르별 조회 [3]웹툰 추천 [4]검색 [5]뒤로가기 : ");
+            System.out.print("[1]요일별 조회 [2]장르별 조회 [3]웹툰 추천 [4]검색 [5]메인페이지 이동 [0]종료 : ");
             choice = sc.nextLine();
             switch (choice) {
                 case "1": // 요일별 웹툰 조회
@@ -47,8 +47,10 @@ public class WebtoonController {
                 case "4": // 검색
                     webtoonDAO.searchWebtoon();
                     break;
-                case "5": // 뒤로가기
+                case "5": // 메인페이지 이동
                     return;
+                case "0": // 종료
+                    System.out.println("종료합니다."); System.exit(1);
                 default:
                     System.out.println("잘못 입력하셨습니다.");
             }

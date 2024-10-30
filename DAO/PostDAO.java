@@ -45,15 +45,17 @@ public class PostDAO {
         return noticeList;
     }
 
-    public String viewPostContent(int postNum) {
+    public String[] viewPostContent(int postNum) {
         String postContent = null;
-        String selectQuery = "SELECT post_content FROM POST WHERE post_num = ?";
+        String postTitle = null;
+        String selectQuery = "SELECT post_title, post_content FROM POST WHERE post_num = ?";
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(selectQuery);
             psmt.setInt(1, postNum);
             rs = psmt.executeQuery();
             while (rs.next()) {
+                postTitle = rs.getString("post_title");
                 postContent = rs.getString("post_content");
             }
             String updateQuery = "UPDATE POST SET post_visit = post_visit + 1 WHERE post_num = ?";
@@ -67,7 +69,7 @@ public class PostDAO {
             Common.close(psmt);
             Common.close(conn);
         }
-        return postContent;
+        return new String[] {postTitle, postContent};
     }
 
     public String getPostTitle(int postNum) {
@@ -209,11 +211,8 @@ public class PostDAO {
             try {
                 conn = Common.getConnection();
                 psmt = conn.prepareStatement(query);
-                System.out.println(postUpdate[1]);
                 psmt.setString(1, postUpdate[1]);
-                System.out.println(postUpdate[2]);
                 psmt.setString(2, postUpdate[2]);
-                System.out.println(postNum);
                 psmt.setInt(3, postNum);
                 rs = psmt.executeQuery();
             } catch (Exception e) {
@@ -239,7 +238,6 @@ public class PostDAO {
             }
         } catch (Exception e) {
         } finally {
-//            Common.close(rs);
             Common.close(psmt);
             Common.close(conn);
         }

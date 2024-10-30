@@ -34,8 +34,9 @@ public class MemberDAO {
                 String memberEmail = rs.getString("member_email");
                 Date memberBirth = rs.getDate("member_birth");
                 String memberNickname = rs.getString("member_nickname");
+                int memberExist = rs.getInt("member_exist");
                 int memberTypeNum = rs.getInt("member_type_num");
-                MemberVO memberVO = new MemberVO(memberNum, memberId, memberPw, memberEmail, memberBirth, memberNickname, memberTypeNum);
+                MemberVO memberVO = new MemberVO(memberNum, memberId, memberPw, memberEmail, memberBirth, memberNickname, memberExist, memberTypeNum);
                 list.add(memberVO);
             }
         } catch (Exception e) {
@@ -45,6 +46,68 @@ public class MemberDAO {
             Common.close(conn);
         }
         return list;
+    }
+
+    public List<String> memberInfoSelect(String memberID) {
+        List<String> favoriteGenre = memberFavoriteGenreSelect(memberID);
+        List<String> memberInfo = new ArrayList<>();
+        String memberQuery = "SELECT m.*, mt.member_type_name "+
+                            "FROM MEMBER m JOIN MEMBER_TYPE mt " +
+                            "ON m.member_type_num = mt.member_type_num " +
+                            "WHERE m.member_id = ? ";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(memberQuery);
+            psmt.setString(1, memberID);
+            rs = psmt.executeQuery();
+            while (rs.next()) {
+                String memberId = rs.getString("member_id");
+                String memberPw = rs.getString("member_pw");
+                String memberEmail = rs.getString("member_email");
+                Date memberBirth = rs.getDate("member_birth");
+                String memberNickname = rs.getString("member_nickname");
+                int memberTypeNum = rs.getInt("member_type_num");
+                memberInfo.add(memberId);
+                memberInfo.add(memberNickname);
+                memberInfo.add(memberPw);
+                memberInfo.add(memberEmail);
+                memberInfo.add(String.valueOf(memberBirth));
+            }
+            for(String e : favoriteGenre) {
+                memberInfo.add(e);
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(rs);
+            Common.close(psmt);
+            Common.close(conn);
+        }
+        return memberInfo;
+    }
+
+    public List<String> memberFavoriteGenreSelect(String memberId) {
+        List<String> favoriteGenre = new ArrayList<>();
+        String genreQuery = "SELECT g.genre_name "+
+                "FROM MEMBER m " +
+                "JOIN FAVORITE_GENRE fg ON m.member_num = fg.member_num " +
+                "JOIN GENRE g ON fg.genre_num = g.genre_num " +
+                "WHERE m.member_id = ?";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(genreQuery);
+            psmt.setString(1, memberId);
+            rs = psmt.executeQuery();
+            while(rs.next()) {
+                String genreName = rs.getString("genre_name");
+                favoriteGenre.add(genreName);
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(rs);
+            Common.close(psmt);
+            Common.close(conn);
+        }
+        return favoriteGenre;
     }
 
     public void memberInsert() {
@@ -142,5 +205,73 @@ public class MemberDAO {
             Common.close(conn);
         }
         return memberNum;
+    }
+
+    public void memberPwUpdate (String memberId, String memberPw) {
+        int rs = 0;
+        String query = "UPDATE MEMBER SET member_pw = ? WHERE member_id = ?";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setString(1, memberPw);
+            psmt.setString(2, memberId);
+            rs = psmt.executeUpdate();
+
+            if (rs > 0) {
+                System.out.println("비밀번호 변경 완료");
+            } else {
+                System.out.println("비밀번호 변경 실패");
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(psmt);
+            Common.close(conn);
+        }
+    }
+
+    public void memberFavoriteGenreUpdate(String memberId, List<Integer> favoriteGenreNums) {
+        int memberNum = memberNumSelect(memberId);
+        String deleteFavoriteGenre = "DELETE FROM FAVORITE_GENRE WHERE member_num = ?";
+        String insertFavoriteGenre = "INSERT INTO FAVORITE_GENRE VALUES (?, ?)";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(deleteFavoriteGenre);
+            psmt.setInt(1, memberNum);
+            rs = psmt.executeQuery();
+            for (int e : favoriteGenreNums) {
+                conn = Common.getConnection();
+                psmt = conn.prepareStatement(insertFavoriteGenre);
+                psmt.setInt(1, memberNum);
+                psmt.setInt(2, e);
+                rs = psmt.executeQuery();
+            }
+            System.out.println("선호장르 수정 완료");
+        } catch (Exception e) {
+            System.out.println("선호장르 수정 실패");
+        } finally {
+            Common.close(psmt);
+            Common.close(conn);
+        }
+    }
+
+    public void deleteMember(String memberId, int existNum) {
+        String query = "UPDATE MEMBER SET member_exist = ? WHERE member_id = ?";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setInt(1, existNum);
+            psmt.setString(2, memberId);
+            rs = psmt.executeQuery();
+            if (existNum == 1) {
+                System.out.println("회원탈퇴 완료. 회원님의 모든 정보는 3일 뒤에 완전 삭제됩니다.");
+                System.out.println("보고싶을거에요.. " + memberId + "님...😢");
+            }
+        } catch (Exception e) {
+            System.out.println("회원탈퇴 실패");
+        } finally {
+            Common.close(psmt);
+            Common.close(conn);
+        }
+
     }
 }

@@ -156,6 +156,28 @@ public class ReplyDAO {
         System.out.println("댓글 수정이 완료되었습니다.");
     }
 
+    public void replyDelete(String memberId, int replyNum) {
+        int rs = 0;
+        int memberNum = memberDAO.memberNumSelect(memberId);
+        String query = "DELETE FROM REPLY WHERE reply_num = ? AND member_num = ? ";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setInt(1, replyNum);
+            psmt.setInt(2, memberNum);
+            rs = psmt.executeUpdate();
+            if(rs > 0) {
+                System.out.println("삭제가 완료되었습니다.");
+            } else {
+                System.out.println("작성자만 삭제 가능합니다.");
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(psmt);
+            Common.close(conn);
+        }
+    }
+
     public void replyLikeInsert(String memberId, int replyNum, int likeDislike) {
         int memberNum = memberDAO.memberNumSelect(memberId);
         String insertQuery = "INSERT INTO REPLY_EVALUATION VALUES (?, ?, ?) ";
@@ -173,7 +195,10 @@ public class ReplyDAO {
             psmt.setInt(1, replyNum);
             rs = psmt.executeQuery();
         } catch (Exception e) {
-            System.out.printf("이미 %s한 댓글입니다.\n", (likeDislike == 0) ? "공감" : "비공감");
+            int evaluationType = replyEvaluationTypeSelect(memberNum, replyNum);
+            String getQuery = "SELECT reply_evaluation_type FROM REPLY_EVALUATION WHERE member_num = ? AND reply_num = ?";
+
+            System.out.printf("이미 %s한 댓글입니다.\n", (evaluationType == 0) ? "공감" : "비공감");
         } finally {
             Common.close(rs);
             Common.close(psmt);
@@ -181,20 +206,45 @@ public class ReplyDAO {
         }
     }
 
-//    public void replyLikeUpdate(int replyNum) {
-//        String query = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
-//        try {
-//            conn = Common.getConnection();
-//            psmt = conn.prepareStatement(query);
-//            psmt.setInt(1, replyNum);
-//            rs = psmt.executeQuery();
-//        } catch (Exception e) {
-//        } finally {
-//            Common.close(rs);
-//            Common.close(psmt);
-//            Common.close(conn);
-//        }
-//    }
+    public void replyLikeDelete(String memberId, int replyNum) {
+        int rs = 0;
+        int memberNum = memberDAO.memberNumSelect(memberId);
+        String query = "DELETE FROM REPLY_EVALUATION WHERE member_num = ? AND reply_num = ? ";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setInt(1, memberNum);
+            psmt.setInt(2, replyNum);
+            rs = psmt.executeUpdate();
+            if(rs > 0) {
+                System.out.println("공감/비공감 취소가 완료되었습니다.");
+            } else {
+                System.out.println("공감/비공감을 누른적이 없습니다.");
+            }
+        } catch (Exception e) {
+        } finally {
+            Common.close(psmt);
+            Common.close(conn);
+        }
+    }
+
+    public int replyEvaluationTypeSelect(int memberNum, int replyNum) {
+        int evaluationType = 0;
+        String query = "SELECT reply_evaluation_type FROM REPLY_EVALUATION WHERE member_num = ? AND reply_num = ?";
+        try {
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(query);
+            psmt.setInt(1, memberNum);
+            psmt.setInt(2, replyNum);
+            rs = psmt.executeQuery();
+
+            while (rs.next()) {
+                evaluationType = rs.getInt("reply_evaluation_type");
+            }
+        } catch (Exception e) {
+        }
+        return evaluationType;
+    }
 
     public void replyDislikeUpdate(int replyNum) {
         String query = "UPDATE REPLY SET reply_dislike_count =  reply_dislike_count + 1 WHERE reply_num = ?";

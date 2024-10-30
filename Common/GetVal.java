@@ -187,4 +187,46 @@ public class GetVal {
         return updateReplyContent;
     }
 
+    public List<Integer> updateFavoriteGenre() {
+        List<Integer> favoriteGenreNums = new ArrayList<>();
+        String[] genre = {"없음", "드라마", "로맨스", "무협", "액션", "판타지"};
+        int[] favoriteGenre = {0, 0, 0, 0, 0, 0};
+        System.out.println("선호 장르를 선택해주세요(최대 3개). [1]드라마 [2]로맨스 [3]무협 [4]액션 [5]판타지 [6]없음 [7]선택완료");
+        int favoriteGenreCnt = 1;
+        while(favoriteGenreCnt <= 3) {
+            System.out.print("선호장르 " + String.valueOf(favoriteGenreCnt) + " : ");
+            String input = sc.nextLine();
+            int inputInt = Integer.parseInt(input);
+            if (inputInt >= 1 && inputInt <= 5 && favoriteGenre[inputInt] == 0){
+                switch (inputInt) {
+                    case 1: favoriteGenre[1]++; break;
+                    case 2: favoriteGenre[2]++; break;
+                    case 3: favoriteGenre[3]++; break;
+                    case 4: favoriteGenre[4]++; break;
+                    case 5: favoriteGenre[5]++; break;
+                }
+                favoriteGenreCnt++;
+            } else if (inputInt == 6 || inputInt == 7) {
+                favoriteGenreCnt = 6;
+            } else if (favoriteGenre[inputInt] == 1){
+                System.out.println("이미 선택하셨습니다.");
+            } else {
+                System.out.println("잘못 입력하셨습니다.");
+            }
+        }
+        if(Arrays.stream(favoriteGenre).sum() == 0) {
+            System.out.println("수정된 선호장르 : 없음");
+        } else {
+            System.out.print("수정된 선호장르 : ");
+            for (int i = 0; i < favoriteGenre.length; i++) {
+                if (favoriteGenre[i] == 1) {
+                    System.out.print(genre[i] + " ");
+                    favoriteGenreNums.add(i);
+                }
+            }
+            System.out.println();
+        }
+        return favoriteGenreNums;
+    }
+
 }
