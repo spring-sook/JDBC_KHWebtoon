@@ -18,7 +18,9 @@ public class Printer {
     }
 
     public void webtoonRecommendResult(List<WebtoonVO> list, String memberNickname) {
-        System.out.println("☆" + memberNickname + "님☆만을 위한 추천 목록");
+        if (memberNickname != null) {
+            System.out.println("☆" + memberNickname + "님☆만을 위한 추천 목록");
+        }
         printWebtoonList(list, "recommend");  // 추천 웹툰 목록 출력
     }
 
@@ -121,7 +123,7 @@ public class Printer {
     public void printPostContent(String title, String content, String postIdx) {
         System.out.println("-".repeat(20) + " " + postIdx + "번 게시글 " + "-".repeat(20));
         System.out.println("제목 : " + title);
-        System.out.println("내용");
+        System.out.print("내용 : ");
         System.out.println(content);
         System.out.println("-".repeat(50));
     }

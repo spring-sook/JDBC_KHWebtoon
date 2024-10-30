@@ -8,7 +8,8 @@ public class MainController {
         String mainChoice = null;
 
         Scanner sc = new Scanner(System.in);
-        LoginController loginController = new LoginController();
+//        LoginController loginController = new LoginController();
+        LoginController loginController = LoginController.getInstance();
 
         while (true) {
             System.out.println("******************************* KH WEBTOON *******************************");

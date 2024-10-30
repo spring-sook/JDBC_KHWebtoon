@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class LoginController {
+    private static LoginController instance;
     private String memberId = null;
     private String memberNickname = null;
     private int memberTypeNum = 1;
@@ -19,6 +20,17 @@ public class LoginController {
     Printer printer = new Printer();
     MemberDAO memberDAO = new MemberDAO();
     MainController mainController = new MainController();
+
+    private LoginController() {
+    }
+
+    // 싱글톤 인스턴스를 반환하는 메서드
+    public static LoginController getInstance() {
+        if (instance == null) {
+            instance = new LoginController();
+        }
+        return instance;
+    }
 
     public void displayLoginService() {
         if(memberId == null) { // 로그인 안되어 있으면
@@ -42,6 +54,9 @@ public class LoginController {
                                 memberDAO.deleteMember(idpw[0], 0);
                                 System.out.println(memberList.get(0).getMemberNickname() + "님! 돌아오신건가요? 반가워요!!!😁😁");
                                 loggedIn = true;
+                                memberId = memberList.get(0).getMemberId();
+                                memberNickname = memberList.get(0).getMemberNickname();
+                                memberTypeNum = memberList.get(0).getMemberTypeNum();
                                 break;
                             }
                         } else {
@@ -110,13 +125,14 @@ public class LoginController {
                         choice = sc.nextLine();
                         if (choice.equals("1")) {
                             memberDAO.deleteMember(memberInfo.get(0), 1);
+                            this.memberId = null;
+                            this.memberNickname = null;
+                            this.memberTypeNum = 1;
+                            mainController.displayMainMenu();
+                            return;
                         }
                     }
-                    memberId = null;
-                    memberNickname = null;
-                    memberTypeNum = 1;
-                    mainController.displayMainMenu();
-                    return;
+                    break;
                 case "4": // 메인페이지 이동
                     mainController.displayMainMenu();
                     return;

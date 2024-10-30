@@ -37,7 +37,7 @@ public class ReplyDAO {
                 int replyLikeCount = rs.getInt("reply_like_count");
                 int replyDislikeCount = rs.getInt("reply_dislike_count");
                 int memberNum = rs.getInt("member_num");
-                String memberNickname = getMemberNickname(memberNum);
+                String memberNickname = getMemberNickname(memberNum, conn);
 
                 ReplyVO replyVO = new ReplyVO(replyNum, replyContent, replyPublishedDate, replyLikeCount, replyDislikeCount, memberNum, memberNickname);
                 replyList.add(replyVO);
@@ -60,7 +60,7 @@ public class ReplyDAO {
             psmt.setInt(1, replyNum);
             rs = psmt.executeQuery();
             while (rs.next()) {
-                replyContent = rs.getString("member_nickname");
+                replyContent = rs.getString("reply_content");
             }
         } catch (Exception e) {
         } finally {
@@ -71,23 +71,18 @@ public class ReplyDAO {
         return replyContent;
     }
 
-    private String getMemberNickname(int memberNum) {
+    private String getMemberNickname(int memberNum, Connection conn) {
         String memberNickname = null;
         String query = "SELECT member_nickname, member_type_num FROM MEMBER " +
                         "WHERE member_num = ?";
-        try {
-            conn = Common.getConnection();
-            psmt = conn.prepareStatement(query);
+        try (PreparedStatement psmt = conn.prepareStatement(query)) {
             psmt.setInt(1, memberNum);
-            rs = psmt.executeQuery();
-            while (rs.next()) {
-                memberNickname = rs.getString("member_nickname");
+            try (ResultSet rs = psmt.executeQuery()) {
+                if (rs.next()) {
+                    memberNickname = rs.getString("member_nickname");
+                }
             }
         } catch (Exception e) {
-        } finally {
-            Common.close(rs);
-            Common.close(psmt);
-            Common.close(conn);
         }
         return memberNickname;
     }
@@ -97,7 +92,7 @@ public class ReplyDAO {
         String query = "SELECT member_id " +
                         "FROM MEMBER m JOIN REPLY r " +
                         "ON m.member_num = r.member_num " +
-                        "WHERE post_num = ?";
+                        "WHERE reply_num = ?";
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(query);
@@ -179,9 +174,14 @@ public class ReplyDAO {
     }
 
     public void replyLikeInsert(String memberId, int replyNum, int likeDislike) {
+        String updateQuery = null;
         int memberNum = memberDAO.memberNumSelect(memberId);
         String insertQuery = "INSERT INTO REPLY_EVALUATION VALUES (?, ?, ?) ";
-        String updateQuery = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
+        if (likeDislike == 0) {
+            updateQuery = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
+        } else if (likeDislike == 1) {
+            updateQuery = "UPDATE REPLY SET reply_dislike_count =  reply_dislike_count + 1 WHERE reply_num = ?";
+        }
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(insertQuery);
@@ -208,19 +208,33 @@ public class ReplyDAO {
 
     public void replyLikeDelete(String memberId, int replyNum) {
         int rs = 0;
+        String updateQuery = null;
         int memberNum = memberDAO.memberNumSelect(memberId);
-        String query = "DELETE FROM REPLY_EVALUATION WHERE member_num = ? AND reply_num = ? ";
+        int likeDislike = replyEvaluationTypeSelect(memberNum, replyNum);
+        String deleteQuery = "DELETE FROM REPLY_EVALUATION WHERE member_num = ? AND reply_num = ? ";
+        if (likeDislike == 0) {
+            updateQuery = "UPDATE REPLY SET reply_like_count =  reply_like_count - 1 WHERE reply_num = ?";
+        } else if (likeDislike == 1) {
+            updateQuery = "UPDATE REPLY SET reply_dislike_count =  reply_dislike_count - 1 WHERE reply_num = ?";
+        }
+
         try {
             conn = Common.getConnection();
-            psmt = conn.prepareStatement(query);
+            psmt = conn.prepareStatement(deleteQuery);
             psmt.setInt(1, memberNum);
             psmt.setInt(2, replyNum);
             rs = psmt.executeUpdate();
+
             if(rs > 0) {
                 System.out.println("공감/비공감 취소가 완료되었습니다.");
             } else {
                 System.out.println("공감/비공감을 누른적이 없습니다.");
             }
+
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(updateQuery);
+            psmt.setInt(1, replyNum);
+            rs = psmt.executeUpdate();
         } catch (Exception e) {
         } finally {
             Common.close(psmt);

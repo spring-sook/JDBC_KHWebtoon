@@ -227,12 +227,25 @@ public class PostDAO {
 
     public void postDelete(int postNum) {
         int rs = 0;
-        String query = "DELETE FROM POST WHERE post_num = ?";
+        String evaluationQeury = "DELETE FROM REPLY_EVALUATION WHERE reply_num IN (SELECT reply_num FROM REPLY WHERE post_num = ?)";
+        String replyQuery = "DELETE FROM REPLY WHERE post_num = ?";
+        String postQuery = "DELETE FROM POST WHERE post_num = ?";
         try {
             conn = Common.getConnection();
-            psmt = conn.prepareStatement(query);
+            psmt = conn.prepareStatement(evaluationQeury);
             psmt.setInt(1, postNum);
             rs = psmt.executeUpdate();
+
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(replyQuery);
+            psmt.setInt(1, postNum);
+            rs = psmt.executeUpdate();
+
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(postQuery);
+            psmt.setInt(1, postNum);
+            rs = psmt.executeUpdate();
+
             if(rs > 0) {
                 System.out.println("삭제가 완료되었습니다.");
             }

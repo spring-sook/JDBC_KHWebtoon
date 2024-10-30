@@ -197,19 +197,21 @@ public class GetVal {
             System.out.print("선호장르 " + String.valueOf(favoriteGenreCnt) + " : ");
             String input = sc.nextLine();
             int inputInt = Integer.parseInt(input);
-            if (inputInt >= 1 && inputInt <= 5 && favoriteGenre[inputInt] == 0){
-                switch (inputInt) {
-                    case 1: favoriteGenre[1]++; break;
-                    case 2: favoriteGenre[2]++; break;
-                    case 3: favoriteGenre[3]++; break;
-                    case 4: favoriteGenre[4]++; break;
-                    case 5: favoriteGenre[5]++; break;
+            if (inputInt >= 1 && inputInt <= 5){
+                if(favoriteGenre[inputInt] == 0) {
+                    switch (inputInt) {
+                        case 1: favoriteGenre[1]++; break;
+                        case 2: favoriteGenre[2]++; break;
+                        case 3: favoriteGenre[3]++; break;
+                        case 4: favoriteGenre[4]++; break;
+                        case 5: favoriteGenre[5]++; break;
+                    }
+                    favoriteGenreCnt++;
+                } else {
+                    System.out.println("이미 선택하셨습니다.");
                 }
-                favoriteGenreCnt++;
             } else if (inputInt == 6 || inputInt == 7) {
                 favoriteGenreCnt = 6;
-            } else if (favoriteGenre[inputInt] == 1){
-                System.out.println("이미 선택하셨습니다.");
             } else {
                 System.out.println("잘못 입력하셨습니다.");
             }
