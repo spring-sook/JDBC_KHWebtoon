@@ -18,7 +18,8 @@ public class PostDAO {
         List<PostVO> noticeList = new ArrayList<>();
         String query = "SELECT post_num, post_title, post_content, post_published_date, post_visit, member_num "+
                         "FROM POST " +
-                        "WHERE board_num = ? ";
+                        "WHERE board_num = ? " +
+                        "ORDER BY post_published_date ";
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(query);
@@ -36,7 +37,6 @@ public class PostDAO {
                 noticeList.add(postVO);
             }
         } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             Common.close(rs);
             Common.close(psmt);
@@ -227,16 +227,19 @@ public class PostDAO {
     }
 
     public void postDelete(int postNum) {
+        int rs = 0;
         String query = "DELETE FROM POST WHERE post_num = ?";
         try {
             conn = Common.getConnection();
             psmt = conn.prepareStatement(query);
             psmt.setInt(1, postNum);
-            rs = psmt.executeQuery();
-            System.out.println("삭제가 완료되었습니다.");
+            rs = psmt.executeUpdate();
+            if(rs > 0) {
+                System.out.println("삭제가 완료되었습니다.");
+            }
         } catch (Exception e) {
         } finally {
-            Common.close(rs);
+//            Common.close(rs);
             Common.close(psmt);
             Common.close(conn);
         }

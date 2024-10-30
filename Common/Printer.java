@@ -50,13 +50,13 @@ public class Printer {
             // 플랫폼별 첫 항목일 때 헤더 출력
             if (platformNum == 0 && countPlatform0 < 9) {
                 if (countPlatform0 == 0) {
-                    System.out.println(">> " + platformName + " " + header + " <<");
+                    System.out.println("<< " + platformName + " " + header + " >>");
                 }
                 printWebtoonDetails(e, availableAgeStr);
                 countPlatform0++;
             } else if (platformNum == 1 && countPlatform1 < 9) {
                 if (countPlatform1 == 0) {
-                    System.out.println(">> " + platformName + " " + header + " <<");
+                    System.out.println("<< " + platformName + " " + header + " >>");
                 }
                 printWebtoonDetails(e, availableAgeStr);
                 countPlatform1++;
@@ -70,11 +70,17 @@ public class Printer {
     }
 
     private void printWebtoonDetails(WebtoonVO e, String availableAgeStr) {
-        System.out.print("[" + e.getWebtoonTitle() + "] ");
-        System.out.print(e.getGenreName() + " ");
-        System.out.print(availableAgeStr + " ");
-        System.out.print(e.getWebtoonRating() + " ");
+        System.out.printf("%-25s ", e.getWebtoonTitle());
+        System.out.printf("%-10s ", e.getGenreName());
+        System.out.printf("%-10s ", availableAgeStr);
+        System.out.printf("%5.2f", e.getWebtoonRating());
         System.out.println();
+
+//        System.out.print("[" + e.getWebtoonTitle() + "] ");
+//        System.out.print(e.getGenreName() + " ");
+//        System.out.print(availableAgeStr + " ");
+//        System.out.print(e.getWebtoonRating() + " ");
+//        System.out.println();
     }
 
     public List<Integer> printPostList(List<PostVO> list, String boardChoice) {
@@ -82,22 +88,22 @@ public class Printer {
         PostDAO postDAO = new PostDAO();
         String header = null;
         int postIdx = 1;
-        if (boardChoice.equals("1")) { header = "공지 게시판"; }
-        else if (boardChoice.equals("2")) { header = "자유 게시판"; }
+        if (boardChoice.equals("1")) { header = "<<공지 게시판>>"; }
+        else if (boardChoice.equals("2")) { header = "<<자유 게시판>>"; }
 //        System.out.println("-".repeat(100));
-        System.out.println(" ".repeat(43) + header);
+        System.out.println(" ".repeat(20) + header);
 //        System.out.println("-".repeat(100));
         if (list.isEmpty()) {
             System.out.println("게시글이 없습니다.");
         } else {
-            System.out.println("   제목  작성자 조회수");
+            System.out.printf("     %-18s %-10s %5s%n", "제목", "작성자", "조회수");
             for (PostVO e : list) {
                 postNum.add(e.getPostNum());
-                System.out.print("(" + postIdx++ + ") ");
-                System.out.print(e.getPostTitle() + " ");
+                System.out.printf("(%d) ", postIdx++);
+                System.out.printf("%-20s ", e.getPostTitle());
                 String memberNickname = postDAO.getMemberNickname(e.getMemberNum());
-                System.out.print(memberNickname + " ");
-                System.out.print(e.getPostVisit());
+                System.out.printf("%-10s ", memberNickname);
+                System.out.printf("%5d", e.getPostVisit());
                 System.out.println();
             }
         }

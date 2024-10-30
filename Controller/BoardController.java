@@ -67,7 +67,6 @@ public class BoardController {
                         if (boardChoice.equals("2")) { // 자유게시판이면 댓글기능 ON
                             displayReplyService(postNums, postIdxNum);
                         }
-                        printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     }
                     break;
                 case "2": // 게시글 작성
@@ -88,7 +87,7 @@ public class BoardController {
                             System.out.println("로그인이 필요한 서비스입니다.");
                         }
                     }
-                    printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
+                    postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     break;
                 case "3": // 게시글 수정
                     if (postNums.isEmpty()) {
@@ -99,11 +98,11 @@ public class BoardController {
                         int postIdxNum = Integer.parseInt(postIdx) - 1;
                         if (postDAO.getMemberId(postNums.get(postIdxNum)).equals(memberId)) {
                             postDAO.postUpdate(postNums.get(postIdxNum));
+                            postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                         } else {
-                            System.out.println("작성자만 수정 가능합니다.");
+                            System.out.println("운영자만 수정 가능합니다.");
                         }
                     }
-                    printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                     break;
                 case "4": // 게시글 삭제
                     if (postNums.isEmpty()) {
@@ -116,8 +115,13 @@ public class BoardController {
                             System.out.print("정말 삭제하시겠습니까? [1]네 [2]아니오 : ");
                             String delChoice = sc.nextLine();
                             if (delChoice.equals("1")) {
-                                postDAO.postDelete(postIdxNum);
+                                postDAO.postDelete(postNums.get(postIdxNum));
+                                postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
+                            } else {
+                                postNums = printer.printPostList(postDAO.noticeSelect(boardNum), boardChoice);
                             }
+                        } else {
+                            System.out.println("운영자만 삭제 가능합니다.");
                         }
                     }
                     break;
@@ -174,16 +178,26 @@ public class BoardController {
                 }
                 break;
             case "3": // 댓글 공감
-                System.out.print("댓글 번호 입력 : ");
-                replyIdx = sc.nextLine();
-                replyIdxNum = Integer.parseInt(replyIdx) - 1;
-                replyDAO.replyLikeUpdate(replyNums.get(replyIdxNum));
-                // 공감 누르면 reply evaluation 테이블 삽입 필요.. 및 검사? 오류 안나게.. 인당 1번만 가능
+                if (memberId != null) {
+                    System.out.print("댓글 번호 입력 : ");
+                    replyIdx = sc.nextLine();
+                    replyIdxNum = Integer.parseInt(replyIdx) - 1;
+
+                    replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 0);
+                } else {
+                    System.out.println("로그인이 필요한 서비스입니다.");
+                }
+                break;
             case "4": // 댓글 비공감
-                System.out.print("댓글 번호 입력 : ");
-                replyIdx = sc.nextLine();
-                replyIdxNum = Integer.parseInt(replyIdx) - 1;
-                replyDAO.replyDislikeUpdate(replyNums.get(replyIdxNum));
+                if (memberId != null) {
+                    System.out.print("댓글 번호 입력 : ");
+                    replyIdx = sc.nextLine();
+                    replyIdxNum = Integer.parseInt(replyIdx) - 1;
+                    replyDAO.replyLikeInsert(memberId, replyNums.get(replyIdxNum), 1);
+                } else {
+                    System.out.println("로그인이 필요한 서비스입니다.");
+                }
+                break;
             case "5": break;
             default:
                 System.out.println("잘못 입력하셨습니다.");

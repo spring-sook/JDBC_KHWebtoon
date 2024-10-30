@@ -28,7 +28,7 @@ public class LoginController {
                         String[] idpw = getVal.idPW();
                         List<MemberVO> memberList = memberDAO.memberSelect(idpw[0], idpw[1]);
                         if (!memberList.isEmpty()) {
-                            System.out.println("로그인 성공! 환영합니다, " + memberList.get(0).getMemberNickname() + ".");
+                            System.out.println("로그인 성공! 환영합니다, " + memberList.get(0).getMemberNickname() + "님.");
                             loggedIn = true;
                             memberId = memberList.get(0).getMemberId();
                             memberNickname = memberList.get(0).getMemberNickname();

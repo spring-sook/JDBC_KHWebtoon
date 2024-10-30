@@ -156,20 +156,45 @@ public class ReplyDAO {
         System.out.println("댓글 수정이 완료되었습니다.");
     }
 
-    public void replyLikeUpdate(int replyNum) {
-        String query = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
+    public void replyLikeInsert(String memberId, int replyNum, int likeDislike) {
+        int memberNum = memberDAO.memberNumSelect(memberId);
+        String insertQuery = "INSERT INTO REPLY_EVALUATION VALUES (?, ?, ?) ";
+        String updateQuery = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
         try {
             conn = Common.getConnection();
-            psmt = conn.prepareStatement(query);
+            psmt = conn.prepareStatement(insertQuery);
+            psmt.setInt(1, memberNum);
+            psmt.setInt(2, replyNum);
+            psmt.setInt(3, likeDislike);
+            rs = psmt.executeQuery();
+
+            conn = Common.getConnection();
+            psmt = conn.prepareStatement(updateQuery);
             psmt.setInt(1, replyNum);
             rs = psmt.executeQuery();
         } catch (Exception e) {
+            System.out.printf("이미 %s한 댓글입니다.\n", (likeDislike == 0) ? "공감" : "비공감");
         } finally {
             Common.close(rs);
             Common.close(psmt);
             Common.close(conn);
         }
     }
+
+//    public void replyLikeUpdate(int replyNum) {
+//        String query = "UPDATE REPLY SET reply_like_count =  reply_like_count + 1 WHERE reply_num = ?";
+//        try {
+//            conn = Common.getConnection();
+//            psmt = conn.prepareStatement(query);
+//            psmt.setInt(1, replyNum);
+//            rs = psmt.executeQuery();
+//        } catch (Exception e) {
+//        } finally {
+//            Common.close(rs);
+//            Common.close(psmt);
+//            Common.close(conn);
+//        }
+//    }
 
     public void replyDislikeUpdate(int replyNum) {
         String query = "UPDATE REPLY SET reply_dislike_count =  reply_dislike_count + 1 WHERE reply_num = ?";
